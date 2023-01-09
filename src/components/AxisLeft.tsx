@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { ScaleLinear } from "d3";
 
-import "./AxisLeft.css";
+import styles from "./AxisLeft.module.css";
 
 type AxisLeftProps = {
   yScale: ScaleLinear<number, number, never>;
@@ -18,9 +18,9 @@ const AxisLeft: FC<AxisLeftProps> = ({
     <>
       {yScale.ticks().map((tickValue) => (
         <g key={tickValue} transform={`translate(0, ${yScale(tickValue)})`}>
-          <line x2={innerWidth} />
+          <line className={styles.line} x2={innerWidth} />
 
-          <text x={-tickOffset} dy=".32em">
+          <text className={styles.text} x={-tickOffset} dy=".32em">
             {tickValue}
           </text>
         </g>

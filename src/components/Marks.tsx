@@ -1,6 +1,8 @@
 import React, { FC } from "react";
 import { MissingMigrantsEvent } from "../hooks/useMissingMigrantsData";
 
+import styles from "./Marks.module.css";
+
 export type MarksProps = {
   data: MissingMigrantsEvent[];
   xScale: any;
@@ -25,7 +27,7 @@ const Marks: FC<MarksProps> = ({
       {data.map((d, index) => (
         <circle
           key={index}
-          className="mark"
+          className={styles.mark}
           cx={xScale(xValue(d))}
           cy={yScale(yValue(d))}
           r={circleRadius}

@@ -1,8 +1,8 @@
-line {
+.line {
   stroke: #C0C0BB;
 }
 
-text {
+.text {
   fill: #635F5D;
-  text-anchor: end;
+  text-anchor: middle;
 }

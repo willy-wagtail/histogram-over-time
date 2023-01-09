@@ -2,9 +2,13 @@
 
 # Notes
 
+https://www.youtube.com/watch?v=2LhoCfjm8R4
+https://vizhub.com/willy-wagtail/4388fef9b53e4ae6aabec95544589096?edit=files&file=index.js
+
 https://missingmigrants.iom.int/downloads
 
 Put onto gist
 
 https://gist.github.com/willy-wagtail/9062899f427340c804262de4177050cf
 
+https://github.com/d3/d3-time-format
