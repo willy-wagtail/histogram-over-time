@@ -1,34 +1,41 @@
 import React, { FC } from "react";
+import { ScaleLinear, ScaleTime } from "d3";
 
 import styles from "./Marks.module.css";
 
+export type DateBinnedValue = {
+  value: number;
+  startDate: Date;
+  endDate: Date;
+};
+
 export type MarksProps = {
-  binnedData: any[];
-  xScale: any;
-  yScale: any;
-  innerHeight: any;
-  tooltipFormat: any;
+  binnedData: DateBinnedValue[];
+  xScale: ScaleTime<number, number, never>;
+  yScale: ScaleLinear<number, number, never>;
+  innerHeight: number;
+  tooltipFormat?: (value: number) => string;
 };
 
 const Marks: FC<MarksProps> = ({
   binnedData,
   xScale,
   yScale,
-  tooltipFormat,
+  tooltipFormat = (d) => d,
   innerHeight,
 }) => {
   return (
     <>
-      {binnedData.map((d: any, index: any) => (
+      {binnedData.map((d, index) => (
         <rect
           key={index}
           className={styles.mark}
-          x={xScale(d.x0)}
-          y={yScale(d.y)}
-          width={xScale(d.x1) - xScale(d.x0)}
-          height={innerHeight - yScale(d.y)}
+          x={xScale(d.startDate)}
+          y={yScale(d.value)}
+          width={xScale(d.endDate) - xScale(d.startDate)}
+          height={innerHeight - yScale(d.value)}
         >
-          <title>{tooltipFormat(d.y)}</title>
+          <title>{tooltipFormat(d.value)}</title>
         </rect>
       ))}
     </>

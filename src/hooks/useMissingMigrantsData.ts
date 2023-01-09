@@ -26,7 +26,7 @@ const isMissingMigrantsCsvRowArray = (
 
 export type MissingMigrantsEvent = {
   date: Date;
-  totalDeadAndMissing: number;
+  totalDeadOrMissing: number;
   longitude: number;
   latitude: number;
 };
@@ -39,7 +39,7 @@ const transform = (d: MissingMigrantsCsvRow): MissingMigrantsEvent => {
 
   return {
     date: new Date(d["Website Date"]),
-    totalDeadAndMissing: +d["Total Number of Dead and Missing"],
+    totalDeadOrMissing: +d["Total Number of Dead and Missing"],
     latitude: +splitCoordinates[0],
     longitude: +splitCoordinates[1],
   };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import {
   timeFormat,
   scaleTime,
@@ -8,6 +8,7 @@ import {
   timeMonths,
   sum,
   max,
+  Bin,
 } from "d3";
 
 import styles from "./App.module.css";
@@ -16,7 +17,7 @@ import {
   MissingMigrantsEvent,
   useMissingMigrantsData,
 } from "./hooks/useMissingMigrantsData";
-import Marks from "./components/Marks";
+import Marks, { DateBinnedValue } from "./components/Marks";
 import AxisLeft from "./components/AxisLeft";
 import AxisBottom from "./components/AxisBottom";
 
@@ -28,47 +29,75 @@ const margin = {
   bottom: 65,
   left: 90,
 };
+
 const xAxisLabelOffset = 50;
 const yAxisLabelOffset = 60;
-
-const xValue = (d: MissingMigrantsEvent) => d.date;
-const yValue: any = (d: MissingMigrantsEvent) => d.totalDeadAndMissing;
 
 const xAxisLabel = "Time";
 const yAxisLabel = "Migrants Dead or Missing";
 
 const xAxisTickFormat = timeFormat("%d/%m/%y");
 
-function App() {
-  const data = useMissingMigrantsData();
+const getEventDate = (d: MissingMigrantsEvent) => d.date;
+const getEventTotalDeadOrMissing = (d: MissingMigrantsEvent) =>
+  d.totalDeadOrMissing;
 
-  if (!data) {
+const mapBinToDateBinnedValue = (
+  bin: Bin<MissingMigrantsEvent, Date>
+): DateBinnedValue => {
+  if (!(bin.x0 && bin.x1)) {
+    throw new Error(
+      "There was an issue getting start and/or end dates for this bin."
+    );
+  }
+
+  return {
+    value: sum(bin, getEventTotalDeadOrMissing),
+    startDate: bin.x0,
+    endDate: bin.x1,
+  };
+};
+
+const App: FC = () => {
+  const missingMigrantsEvents = useMissingMigrantsData();
+
+  if (!missingMigrantsEvents) {
     return <pre className={styles.pre}>Loading...</pre>;
   }
 
   const innerHeight = height - margin.top - margin.bottom;
   const innerWidth = width - margin.left - margin.right;
 
-  const xScale = scaleTime()
-    .domain(extent(data, xValue) as any)
-    .range([0, innerWidth])
-    .nice();
+  const xDomain = extent(missingMigrantsEvents, getEventDate);
+
+  if (!(xDomain[0] || xDomain[1])) {
+    throw new Error(
+      "There was an issue getting min and max values for the x-axis."
+    );
+  }
+
+  const xScale = scaleTime().domain(xDomain).range([0, innerWidth]).nice();
 
   const [startDate, stopDate] = xScale.domain();
 
-  const binnedData = bin()
-    .value(xValue as any)
-    .domain(xScale.domain() as any)
-    .thresholds(timeMonths(startDate, stopDate) as any)(data as any)
-    .map((array) => ({
-      y: sum(array, yValue),
-      x0: array.x0,
-      x1: array.x1,
-    }));
+  const binThresholds = timeMonths(startDate, stopDate);
 
-  const yScale = scaleLinear()
-    .domain([0, max(binnedData, (d: any) => d.y)] as any)
-    .range([innerHeight, 0]);
+  const binGenerator = bin<MissingMigrantsEvent, Date>()
+    .value(getEventDate)
+    .domain([startDate, stopDate])
+    .thresholds(binThresholds);
+
+  const binnedData: DateBinnedValue[] = binGenerator(missingMigrantsEvents).map(
+    mapBinToDateBinnedValue
+  );
+
+  const maxValue = max(binnedData, (d: DateBinnedValue) => d.value);
+
+  if (!maxValue) {
+    throw new Error("There was an issue getting the max value for the y-axis.");
+  }
+
+  const yScale = scaleLinear().domain([0, maxValue]).range([innerHeight, 0]);
 
   return (
     <svg width={width} height={height}>
@@ -105,12 +134,11 @@ function App() {
           binnedData={binnedData}
           xScale={xScale}
           yScale={yScale}
-          tooltipFormat={xAxisTickFormat}
           innerHeight={innerHeight}
         />
       </g>
     </svg>
   );
-}
+};
 
 export default App;
