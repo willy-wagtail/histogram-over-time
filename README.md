@@ -12,3 +12,5 @@ Put onto gist
 https://gist.github.com/willy-wagtail/9062899f427340c804262de4177050cf
 
 https://github.com/d3/d3-time-format
+
+https://github.com/d3/d3-time#intervals used for ranges in the x-axis (e.g. months)

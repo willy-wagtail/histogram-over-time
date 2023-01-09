@@ -1,5 +1,14 @@
 import React from "react";
-import { timeFormat, scaleTime, extent, scaleLinear } from "d3";
+import {
+  timeFormat,
+  scaleTime,
+  extent,
+  scaleLinear,
+  bin,
+  timeMonths,
+  sum,
+  max,
+} from "d3";
 
 import styles from "./App.module.css";
 
@@ -20,7 +29,15 @@ const margin = {
   left: 90,
 };
 const xAxisLabelOffset = 50;
-const yAxisLabelOffset = 45;
+const yAxisLabelOffset = 60;
+
+const xValue = (d: MissingMigrantsEvent) => d.date;
+const yValue: any = (d: MissingMigrantsEvent) => d.totalDeadAndMissing;
+
+const xAxisLabel = "Time";
+const yAxisLabel = "Migrants Dead or Missing";
+
+const xAxisTickFormat = timeFormat("%d/%m/%y");
 
 function App() {
   const data = useMissingMigrantsData();
@@ -32,23 +49,30 @@ function App() {
   const innerHeight = height - margin.top - margin.bottom;
   const innerWidth = width - margin.left - margin.right;
 
-  const xValue = (d: MissingMigrantsEvent) => d.date;
-  const xAxisLabel = "Time";
-  const xAxisTickFormat = timeFormat("%d/%m/%y");
   const xScale = scaleTime()
     .domain(extent(data, xValue) as any)
     .range([0, innerWidth])
     .nice();
 
-  const yValue: any = (d: MissingMigrantsEvent) => d.totalDeadAndMissing;
-  const yAxisLabel = "Total Dead and Missing";
+  const [startDate, stopDate] = xScale.domain();
+
+  const binnedData = bin()
+    .value(xValue as any)
+    .domain(xScale.domain() as any)
+    .thresholds(timeMonths(startDate, stopDate) as any)(data as any)
+    .map((array) => ({
+      y: sum(array, yValue),
+      x0: array.x0,
+      x1: array.x1,
+    }));
+
   const yScale = scaleLinear()
-    .domain(extent(data, yValue) as any)
+    .domain([0, max(binnedData, (d: any) => d.y)] as any)
     .range([innerHeight, 0]);
 
   return (
     <svg width={width} height={height}>
-      <g transform={`translate(${margin.left},${margin.top})`}>
+      <g transform={`translate(${margin.left}, ${margin.top})`}>
         <AxisLeft yScale={yScale} innerWidth={innerWidth} tickOffset={5} />
 
         <AxisBottom
@@ -78,13 +102,11 @@ function App() {
         </text>
 
         <Marks
-          data={data}
+          binnedData={binnedData}
           xScale={xScale}
-          xValue={xValue}
           yScale={yScale}
-          yValue={yValue}
           tooltipFormat={xAxisTickFormat}
-          circleRadius={2}
+          innerHeight={innerHeight}
         />
       </g>
     </svg>

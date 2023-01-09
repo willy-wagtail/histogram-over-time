@@ -1,39 +1,35 @@
 import React, { FC } from "react";
-import { MissingMigrantsEvent } from "../hooks/useMissingMigrantsData";
 
 import styles from "./Marks.module.css";
 
 export type MarksProps = {
-  data: MissingMigrantsEvent[];
+  binnedData: any[];
   xScale: any;
   yScale: any;
-  xValue: any;
-  yValue: any;
+  innerHeight: any;
   tooltipFormat: any;
-  circleRadius: any;
 };
 
 const Marks: FC<MarksProps> = ({
-  data,
+  binnedData,
   xScale,
   yScale,
-  xValue,
-  yValue,
   tooltipFormat,
-  circleRadius,
+  innerHeight,
 }) => {
   return (
     <>
-      {data.map((d, index) => (
-        <circle
+      {binnedData.map((d: any, index: any) => (
+        <rect
           key={index}
           className={styles.mark}
-          cx={xScale(xValue(d))}
-          cy={yScale(yValue(d))}
-          r={circleRadius}
+          x={xScale(d.x0)}
+          y={yScale(d.y)}
+          width={xScale(d.x1) - xScale(d.x0)}
+          height={innerHeight - yScale(d.y)}
         >
-          <title>{tooltipFormat(xValue(d))}</title>
-        </circle>
+          <title>{tooltipFormat(d.y)}</title>
+        </rect>
       ))}
     </>
   );

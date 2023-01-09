@@ -18,11 +18,8 @@ const AxisBottom: FC<AxisBottomProps> = ({
 }) => {
   return (
     <>
-      {xScale.ticks().map((tickValue) => (
-        <g
-          key={tickValue.getMilliseconds()}
-          transform={`translate(${xScale(tickValue)}, 0)`}
-        >
+      {xScale.ticks().map((tickValue, index) => (
+        <g key={index} transform={`translate(${xScale(tickValue)}, 0)`}>
           <line className={styles.line} y2={innerHeight} />
 
           <text className={styles.text} dy=".71em" y={innerHeight + tickOffset}>
