@@ -1,5 +1,7 @@
 # Histogram over time
 
+This repo contains a data visualisation of the total number of migrants missing or dead around the world, per month. Migrant events are preprocessed and aggregated into monthly bins and presented in a histogram. Tech used: react (and create-react-app), d3, and Github gist.
+
 # Notes
 
 https://www.youtube.com/watch?v=2LhoCfjm8R4
